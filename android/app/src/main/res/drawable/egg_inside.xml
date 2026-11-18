@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Intérieur + jaune. Généré par gen_egg.py -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+<group><clip-path android:pathData="M54,27 C66.5,27 76,45 76,60 C76,73.5 66.5,83 54,83 C41.5,83 32,73.5 32,60 C32,45 41.5,27 54,27 Z"/><path android:fillColor="#C9A46A" android:pathData="M33.4,55 A20.6,5.2 0 1,1 74.6,55 A20.6,5.2 0 1,1 33.4,55 Z"/><path android:fillColor="#E3C690" android:pathData="M33.4,55 A20.6,5.2 0 0,1 74.6,55 L74.6,56 A20.6,3.6 0 0,0 33.4,56 Z"/><group><clip-path android:pathData="M33.4,55 A20.6,5.2 0 1,1 74.6,55 A20.6,5.2 0 1,1 33.4,55 Z"/><path android:fillColor="#FFB300" android:pathData="M44,57 C44,50.5 48.5,47 54,47 C59.5,47 64,50.5 64,57 Z"/><path android:fillColor="#FFD54F" android:pathData="M48,52 C48.6,50 50.6,48.9 52.6,48.9 C53.6,48.9 53.6,50.1 52.6,50.3 C51,50.6 49.8,51.6 49.4,52.8 C49,53.8 47.7,53.2 48,52 Z"/></group></group>
+</vector>

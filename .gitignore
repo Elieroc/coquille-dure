@@ -1,0 +1,15 @@
+.env
+.venv/
+scraper/data/
+__pycache__/
+*.pyc
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/.kotlin/
+.idea/
+*.apk
+qa/shots/
+qa/shots_avant/
+docs/cookidoo_ref/

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CoquilleDure" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Fenêtre de démarrage : fond vert + œuf intact, repris ensuite par l'animation Compose (EggSplash). -->
+    <style name="Theme.CoquilleDure.Starting">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <!-- Plein écran : l'œuf est centré sur tout l'écran, comme dans l'animation Compose (edge-to-edge). -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+</resources>
