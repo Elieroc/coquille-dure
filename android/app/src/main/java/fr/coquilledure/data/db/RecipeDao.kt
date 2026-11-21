@@ -86,4 +86,14 @@ interface RecipeDao {
 
     @Query("SELECT COUNT(*) FROM recipes WHERE tmVersions != ''")
     suspend fun countWithMeta(): Int
+
+    // --- import Cookidoo ---
+    @Query("SELECT id FROM recipes WHERE id IN (:ids)")
+    suspend fun existingIds(ids: List<String>): List<String>
+
+    @Query("UPDATE recipes SET isFavorite = 0")
+    suspend fun clearFavorites()
+
+    @Query("DELETE FROM recipes WHERE id LIKE 'u%'")
+    suspend fun deleteCreations()
 }

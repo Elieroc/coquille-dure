@@ -31,7 +31,7 @@ private val tastes = listOf("Régime végétarien", "Facile pour le quotidien", 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ProfileScreen(onBack: () -> Unit) {
+fun ProfileScreen(onBack: () -> Unit, onImport: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("profile", Context.MODE_PRIVATE) }
     val searchPrefs = remember { context.getSharedPreferences("search", Context.MODE_PRIVATE) }
@@ -41,7 +41,6 @@ fun ProfileScreen(onBack: () -> Unit) {
     var tm by remember { mutableStateOf(searchPrefs.getString("tm", null)) }
     var editName by remember { mutableStateOf(false) }
     var legal by remember { mutableStateOf(false) }
-    var importing by remember { mutableStateOf(false) }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
@@ -51,8 +50,6 @@ fun ProfileScreen(onBack: () -> Unit) {
             prefs.edit().putString("photo", photo).apply()
         }
     }
-
-    if (importing) { fr.coquilledure.ui.importer.CookidooLoginPrototype(onBack = { importing = false }); return }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -101,7 +98,7 @@ fun ProfileScreen(onBack: () -> Unit) {
                 }
             }
 
-            Text("Importer depuis Cookidoo", Modifier.fillMaxWidth().clickable { importing = true }.padding(vertical = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("Importer depuis Cookidoo", Modifier.fillMaxWidth().clickable(onClick = onImport).padding(vertical = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text("Mentions légales", Modifier.fillMaxWidth().clickable { legal = true }.padding(vertical = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
     }

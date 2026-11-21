@@ -41,4 +41,7 @@ interface CollectionDao {
 
     @Query("DELETE FROM saved_collections WHERE collectionId = :id")
     suspend fun unsave(id: String)
+
+    @Query("DELETE FROM saved_collections")
+    suspend fun clearSaved()
 }

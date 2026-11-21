@@ -72,7 +72,7 @@ Le token du flux WebView (prototype Android) donne les mêmes accès que `cookid
 | Évaluation perso | `GET rating/{lang}/user-ratings/recipes/{recipeId}` | 404 `Could not find user rating.` si aucune ; **une requête par recette** |
 | Recettes d'une collection | `GET recipes/recipe/{lang}/{id}/collections` | (rel `recipe:recipe-collections`) |
 
-Absents : notes perso sur une recette (aucun rel `note`), dump groupé des évaluations
+Absents : dump groupé des évaluations
 (`rating/{lang}/recipes-ratings` renvoie 404), `list-sync/custom-list` et
 `planning/.../list-sync/my-week` (404). Services testés en 404 : `recipes`, `bookmarks`,
 `favorites`, `collections`, `cooking`, `remote-monitoring`.
@@ -91,6 +91,60 @@ Autres rels notables : `organize:api-associated-recipe-list` (`api/associated-re
   et `additionalItems[]` ; les ingrédients (`get_ingredient_items`, 36 ici) sont
   `{id, name, is_owned, description (quantité), preparation}` avec `is_owned` = coché.
 - Évaluation perso : 404 pour toutes les recettes testées (aucune notée sur ce compte).
-- `GET created-recipes/fr-FR` : HTTP 502 constant le 2026-11-18, aussi via `cookidoo_api.list_custom_recipes()`
-  (il répondait 200 avant l'ajout de données). Panne côté Cookidoo ou bug du service : prévoir une erreur
-  tolérée (l'import continue sans les créations) et retester.
+- `created-recipes` : HTTP 502 sur **tout le service** (liste, `/{id}`, `device/lists`, `health-check`),
+  sur `.fr`, `.ch` et `.de`, avec ou sans User-Agent, avec ou sans paramètres. Le corps est la page de
+  maintenance HTML de Cookidoo (« Des ingrédients frais sont en chemin… reviendrons très prochainement »).
+  Seul `created-recipes/.well-known/home` répond 200 (servi par la passerelle). Ce n'est donc ni un bug
+  du compte ni de `cookidoo_api` : panne côté Cookidoo, constatée le 2026-11-18. À retester plus tard.
+  L'import doit traiter toute réponse non-JSON ou 5xx de ce service comme « créations indisponibles »,
+  continuer le reste et l'indiquer dans le rapport.
+
+### Créations : appels API identifiés (service en panne, non vérifiables)
+
+Document `https://cookidoo.fr/.well-known/mobile-home` (celui de l'app mobile) : les services
+sont aussi exposés sur `https://fr.tmmobile.vorwerk-digital.com/{service}/…` (app mobile) et
+`https://fr.web.production-eu.cookidoo.vorwerk-digital.com/{service}/…` (web). `created-recipes`
+répond **502 sur les trois hôtes**, y compris `/.well-known/home` : panne d'origine, pas de contournement.
+
+Rels du service `created-recipes` (extraits de son `.well-known/home`, 2026-11-18) :
+
+| Rel | Chemin |
+|---|---|
+| `recipes-list` / `recipe-create` | `GET created-recipes/{lang}` (liste ; `?ids=`), en-tête `Accept: application/vnd.vorwerk.customer-recipe.full+json` (valeur de `cookidoo_api`) |
+| `recipe-details` | `GET created-recipes/{lang}/{id}` |
+| `recipe-details-public` | `GET created-recipes/public/recipes/{lang}/{id}` |
+| `device-offline-recipes` | `GET created-recipes/{lang}/device/offline-recipes` (liste pour appareils) |
+| `device-recipe-details` | `GET created-recipes/{lang}/device/recipes/{recipe_id}` |
+| `device-lists` / `device-list-details` | `GET created-recipes/{lang}/device/lists/{type}[/{id}]` |
+| `recipes-download`, `config`, `image-signature` | `…/{lang}/download`, `…/config`, `…/image/signature` |
+
+Aucune autre voie : `organize/api/list-sync/{created,customer-recipes,…}` 404, `list-sync/customlist`
+200 mais ce sont les listes perso ; `search?context=created` renvoie le catalogue. Les créations ne
+sont référencées ailleurs que par id (`planning … customerRecipeIds`, `shopping … customerRecipes`).
+Le code Kotlin (`CookidooApi.creations()`) utilise déjà `recipes-list` ; à valider quand le service revient.
+
+### Notes perso : elles existent (correction)
+
+Service `recipe-notes` (200 sur `cookidoo.fr`) :
+`GET recipe-notes/{lang}/recipes/{recipeId}` (204 sans corps si aucune note, testé sur 8 recettes),
+`POST recipe-notes/{lang}/recipes` (création, non appelé). Pas de liste : une requête par recette.
+Autre service du mobile : `ri-api-gateway` (`/api/v1/import`, `/api/translations`, `/api/plant-based`).
+Format d'une note (réponse 200) non vérifié, aucune note sur le compte de test.
+
+### App Cookidoo officielle (Android 26.10.11, observée le 2026-11-18 sur le téléphone, adb sans fil)
+
+- L'app affiche « Mes créations : 0 Recette » puis l'écran vide « Ajouter vos propres recettes » (pas de message d'erreur),
+  alors que `GET created-recipes/fr-FR` renvoie 502 pour nous. Les deux cas sont compatibles avec « aucune création »
+  (le tout premier appel, avant l'ajout de données, avait renvoyé 200 `{"meta":…, "items":[]}`) ; l'app peut aussi
+  masquer l'erreur. À trancher : demander à l'utilisateur s'il a réellement des créations dans Cookidoo.
+- Analyse statique de l'APK (strings des `classes*.dex`, client Ktor/OkHttp, Realm local) :
+  - hôte mobile `https://%s.tmmobile.vorwerk-digital.com`, découverte par `/.well-known/mobile-home` (rel `tmde2:customer-recipes`) ;
+  - en-têtes `Accept` propres au mobile : `application/vnd.vorwerk.customer-recipe.full+json` (créations),
+    `…organize.bookmark.mobile+json`, `…organize.custom-list.mobile+json`, `…organize.managed-list.mobile+json`,
+    `…planning.my-day.mobile+json`, `…planning.my-day-enhanced.mobile+json`, `…recipe.mobile.v1+json` ;
+  - rels utilisés pour les créations : `customer-recipes:recipe-create` (liste), `recipe-details`, `recipes-list`,
+    `config`, `image-signature`, `add-to-cookidoo`, `import-options`, `scale-recipe-page`, `mobile-share-recipe` ;
+  - détail, édition et mise à l'échelle d'une création sont des **WebViews** (pages serveur), pas des JSON ;
+  - la liste passe par `CustomerRecipesSyncWorker` / `MyRecipesSyncWorker` et un DTO `CustomerRecipesCollectionDto` ;
+  - notes perso : `RecipeNoteDto` / `UpdateNoteDto`, service `recipe-notes` confirmé.
+- Pas de capture réseau : le trafic est en TLS et aucun proxy d'interception n'a été installé.

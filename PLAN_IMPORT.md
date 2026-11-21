@@ -4,6 +4,15 @@ Objectif : depuis Coquille dure, l'utilisateur se connecte à son compte Cookido
 
 Établi le 2026-11-18 à partir de `cookidoo-api` 0.19.0 (`.venv`), qui sert de référence pour les endpoints et le login. Le schéma Room est en v10.
 
+## État d'avancement (2026-11-18)
+
+Fait et testé sur `qa_pixel_api36` avec le compte de test (2 favoris, 1 liste, 3 en Ma semaine, 3 en courses) :
+connexion WebView, client API Kotlin (`data/cookidoo/`), collecte, import transactionnel (`CookidooImporter`),
+écrans (`ui/importer/`), fusion et remplacement, réimport sans doublon, service `created-recipes` en panne toléré.
+Non vérifié : créations (service en panne, format supposé d'après `cookidoo_api`), collections enregistrées (compte à 0),
+évaluations (format d'une réponse 200 inconnu), nom du profil (vide sur ce compte), Android 8, téléphone réel,
+connexion Google/Apple, tests unitaires, `.zip`/images des créations (code écrit, jamais exécuté).
+
 ## 0. Principes
 
 - **L'import est ponctuel, sans synchronisation.** On ne garde aucun token après l'import et l'app n'écrit jamais sur le compte Cookidoo (aucun POST, PATCH ou DELETE côté API, sauf l'échange de token).
@@ -45,7 +54,7 @@ Objectif : depuis Coquille dure, l'utilisateur se connecte à son compte Cookido
 | Appareils TM | `customer-devices/api/my-devices/versions` | `get_devices` | préférence « Mes appareils » |
 | Favoris | `organize/{lang}/api/bookmark?page=N` (rel `organize:api-bookmark`, paginé) | `GET` brut, absent de la lib | `recipes.isFavorite` |
 | Évaluations | `rating/{lang}/user-ratings/recipes/{id}` (une requête par recette, 404 si aucune ; pas de dump groupé) | absent | `recipe_ratings` |
-| Notes perso | **inexistant** : aucun rel `note` dans l'API (repérage du 2026-11-18) | — | abandonné |
+| Notes perso | `GET recipe-notes/{lang}/recipes/{id}` (une requête par recette, 204 si aucune) | brut, absent de la lib | `recipe_notes` (à faire) |
 
 Hors périmètre : abonnement, historique de cuisson, collections achetées non enregistrées.
 
@@ -53,7 +62,7 @@ Hors périmètre : abonnement, historique de cuisson, collections achetées non 
 
 ### Étape 1 — Repérage de l'API (FAIT le 2026-11-18)
 
-Résultats détaillés dans `scraper/REVERSE_NOTES.md` §4, script `scraper/10_discover_user.py`. Favoris trouvés (`organize/{lang}/api/bookmark`), notes perso inexistantes, évaluations sans dump groupé. Formats confirmés sur un compte rempli (favoris, listes, Ma semaine, courses). Restent à confirmer : collections enregistrées et créations (`created-recipes` répond 502, à retester ; l'import doit tolérer cette erreur et continuer). Plan initial de l'étape :
+Résultats détaillés dans `scraper/REVERSE_NOTES.md` §4, script `scraper/10_discover_user.py`. Favoris trouvés (`organize/{lang}/api/bookmark`), notes perso inexistantes, évaluations sans dump groupé. Formats confirmés sur un compte rempli (favoris, listes, Ma semaine, courses). Restent à confirmer : collections enregistrées et créations (`created-recipes` est en panne côté Cookidoo (502 sur tout le service, page de maintenance, constaté le 2026-11-18), à retester ; l'import doit tolérer cette erreur, continuer et la signaler dans le rapport). Plan initial de l'étape :
 
 1. Script `scraper/10_discover_user.py`, lancé avec ton compte (`.env`). Il récupère `.well-known/home` des services `organize`, `planning`, `shopping`, `created-recipes`, `rating`, `community/profile` et `customer-devices`. Il enregistre les rels dans `scraper/data/user/well_known.json` et un exemple de réponse JSON par endpoint dans `scraper/data/user/samples/`.
 2. Trouver les rels des favoris et des notes perso. Vérifier si `user-ratings` a une version groupée.

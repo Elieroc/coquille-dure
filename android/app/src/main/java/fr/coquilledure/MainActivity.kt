@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
             CoquilleDureTheme {
                 var splashDone by rememberSaveable { mutableStateOf(false) }
                 Box(Modifier.fillMaxSize()) {
-                    CoquilleDureRoot()
+                    CoquilleDureRoot(splashDone)
                     if (!splashDone) EggSplash(onFinished = { splashDone = true })
                 }
             }
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun CoquilleDureRoot() {
+private fun CoquilleDureRoot(splashDone: Boolean) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -193,11 +193,17 @@ private fun CoquilleDureRoot() {
                 )
             }
             composable(Screen.Profile.route) {
-                fr.coquilledure.ui.profile.ProfileScreen(onBack = { navController.popBackStack() })
+                fr.coquilledure.ui.profile.ProfileScreen(onBack = { navController.popBackStack() }, onImport = { navController.navigate(Screen.CookidooImport.route) })
+            }
+            composable(Screen.CookidooImport.route) {
+                fr.coquilledure.ui.importer.CookidooImportScreen(onBack = { navController.popBackStack() })
             }
             composable(Screen.CookingMode.route) {
                 CookingModeScreen(onBack = { navController.popBackStack() })
             }
+        }
+        fr.coquilledure.ui.importer.ImportWelcomePrompt(ready = splashDone) {
+            navController.navigate(Screen.CookidooImport.route)
         }
         fr.coquilledure.ui.components.AppMessageHost(
             Modifier.align(Alignment.BottomCenter)

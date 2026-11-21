@@ -18,6 +18,12 @@ interface PlannerDao {
 
     @Query("UPDATE planned_recipes SET date = :date WHERE id = :id")
     suspend fun movePlanned(id: Long, date: String)
+
+    @Query("SELECT COUNT(*) FROM planned_recipes WHERE recipeId = :recipeId AND date = :date")
+    suspend fun countPlanned(recipeId: String, date: String): Int
+
+    @Query("DELETE FROM planned_recipes")
+    suspend fun clearPlanned()
 }
 
 @Dao
@@ -49,6 +55,9 @@ interface ShoppingDao {
 
     @Query("DELETE FROM shopping_items WHERE id IN (:ids)")
     suspend fun deleteItems(ids: List<Long>)
+
+    @Query("SELECT name FROM shopping_items WHERE recipeId IS NULL")
+    suspend fun freeItemNames(): List<String>
 
     @Query("DELETE FROM shopping_items")
     suspend fun clearItems()

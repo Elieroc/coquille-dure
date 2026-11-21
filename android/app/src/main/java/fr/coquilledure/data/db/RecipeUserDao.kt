@@ -21,4 +21,7 @@ interface RecipeUserDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveRating(r: RecipeRatingEntity)
+
+    @Query("DELETE FROM recipe_ratings")
+    suspend fun clearRatings()
 }

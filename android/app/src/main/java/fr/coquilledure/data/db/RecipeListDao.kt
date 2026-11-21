@@ -33,4 +33,13 @@ interface RecipeListDao {
 
     @Query("SELECT recipes.* FROM recipes JOIN recipe_list_items ON recipe_list_items.recipeId = recipes.id WHERE recipe_list_items.listId = :id ORDER BY recipes.name")
     fun recipes(id: Long): Flow<List<RecipeEntity>>
+
+    @Query("SELECT id FROM recipe_lists WHERE name = :name LIMIT 1")
+    suspend fun idByName(name: String): Long?
+
+    @Query("DELETE FROM recipe_list_items")
+    suspend fun clearAllItems()
+
+    @Query("DELETE FROM recipe_lists")
+    suspend fun clearAllLists()
 }
