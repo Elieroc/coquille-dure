@@ -92,7 +92,7 @@ fun RecipeDetailScreen(
                     contentDescription = r.name,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(440.dp)
+                        .height(minOf(440f, androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp * 0.6f).dp)
                         .clip(RoundedCornerShape(bottomEnd = 72.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentScale = ContentScale.Crop,

@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.padding
@@ -58,10 +61,39 @@ private fun CoquilleDureRoot(splashDone: Boolean) {
 
     val showBottomBar = bottomNavItems.any { it.screen.route == currentDestination?.route }
 
+    val landscape = androidx.compose.ui.platform.LocalConfiguration.current.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    val bottomBarVisible = showBottomBar && !landscape
+    Row(Modifier.fillMaxSize()) {
+    if (showBottomBar && landscape) {
+        NavigationRail(containerColor = MaterialTheme.colorScheme.surface) {
+            Spacer(Modifier.weight(1f))
+            bottomNavItems.forEach { item ->
+                val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
+                NavigationRailItem(
+                    selected = selected,
+                    onClick = {
+                        navController.navigate(item.screen.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(if (selected) item.selectedIcon else item.unselectedIcon, item.label) },
+                    alwaysShowLabel = false,
+                    colors = NavigationRailItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = Color.Transparent,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                )
+            }
+            Spacer(Modifier.weight(1f))
+        }
+    }
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.weight(1f).fillMaxHeight(),
         bottomBar = {
-            if (showBottomBar) {
+            if (bottomBarVisible) {
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
                     bottomNavItems.forEach { item ->
                         val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
@@ -98,7 +130,7 @@ private fun CoquilleDureRoot(splashDone: Boolean) {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            modifier = Modifier.padding(bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 0.dp),
+            modifier = Modifier.padding(bottom = if (bottomBarVisible) innerPadding.calculateBottomPadding() else 0.dp),
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
@@ -214,8 +246,9 @@ private fun CoquilleDureRoot(splashDone: Boolean) {
         }
         fr.coquilledure.ui.components.AppMessageHost(
             Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 24.dp),
+                .padding(bottom = if (bottomBarVisible) innerPadding.calculateBottomPadding() else 24.dp),
         )
       }
+    }
     }
 }
