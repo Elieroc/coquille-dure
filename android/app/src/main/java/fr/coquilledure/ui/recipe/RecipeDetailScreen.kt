@@ -82,6 +82,16 @@ fun RecipeDetailScreen(
     }
     val servings = (r.servingSize * multiplier).roundToInt()
     val scrolled by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+    // Photo plein cadre en haut : icônes de barre d'état claires tant qu'elle est visible, thème normal ensuite.
+    val view = androidx.compose.ui.platform.LocalView.current
+    val dark = androidx.compose.foundation.isSystemInDarkTheme()
+    DisposableEffect(scrolled, dark) {
+        val window = (view.context as? android.app.Activity)?.window
+        val controller = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, view) }
+        controller?.isAppearanceLightStatusBars = scrolled && !dark
+        onDispose { controller?.isAppearanceLightStatusBars = !dark }
+    }
     val showSticky by remember { derivedStateOf { listState.firstVisibleItemIndex >= 2 } }
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
