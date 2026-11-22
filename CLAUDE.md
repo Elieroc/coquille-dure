@@ -37,7 +37,7 @@ Scraper : venv `.venv`, `pip install -r scraper/requirements.txt`, scripts lanc�
 
 **Couches de l'app** (`android/app/src/main/java/fr/coquilledure/`) : `data/db` (entités, DAO Room, `RecipeFilter` pour la recherche, FTS), `data/repository` (Recipe, Planner, UserContent), `data/shopping/ShoppingLogic.kt`, `di/AppModule.kt` (Hilt), `ui/<écran>` (home, search/Découvrir, planner, favorites/Mes recettes, recipe, cooking, profile) avec ViewModels Hilt, `ui/components` (cartes recette, feuilles d'actions ⋮, sélecteur de date), `ui/navigation` (barre du bas à 5 onglets). Écran principal dans `MainActivity.kt`.
 
-**Contraintes UI :** police plafonnée à 1.3 (`Theme.kt`) ; l'app est distribuée à des proches (Android 8+) donc tester petit écran, police agrandie, mode sombre. Fonctions en ligne de Cookidoo (Assistant IA, abonnement, traduire, notifications push) sont volontairement hors périmètre.
+**Contraintes UI :** police plafonnée à 1.3 (`Theme.kt`) ; l'app est distribuée à des proches (Android 8+) donc tester petit écran, police agrandie, mode sombre. Fonctions en ligne de Cookidoo (abonnement, traduire, notifications push) sont volontairement hors périmètre. L'Assistant est refait **hors ligne, sans IA ni compte** (`data/assistant/`, écran `ui/assistant/`) : `AssistantIntentParser` (règles FR → ingrédients, type de plat, durée, personnes, régime, « sans X ») → recherche FTS via `RecipeFilter` + vérification exacte des ingrédients → phrases par gabarits (`AssistantPhrasing`). Tests JVM : `cd android && JAVA_HOME=~/Android/jdk ./gradlew testDebugUnitTest`.
 
 ## Planification
 

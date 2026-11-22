@@ -32,6 +32,7 @@ sealed class Screen(val route: String) {
     object Editor : Screen("editor/{id}") { fun withId(id: String) = "editor/$id" }
     object Profile : Screen("profile")
     object CookidooImport : Screen("cookidoo-import")
+    object Assistant : Screen("assistant")
     object CookingMode : Screen("cooking/{recipeId}") {
         fun withId(id: String) = "cooking/$id"
     }

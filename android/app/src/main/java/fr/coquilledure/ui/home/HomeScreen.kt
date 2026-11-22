@@ -10,6 +10,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.*
@@ -20,6 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -36,6 +40,7 @@ import fr.coquilledure.ui.components.formatTimeSpaced
 fun HomeScreen(
     onRecipeClick: (String) -> Unit,
     onOpenProfile: () -> Unit,
+    onOpenAssistant: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val recipes by viewModel.recipes.collectAsState()
@@ -55,6 +60,7 @@ fun HomeScreen(
     val heroHeight = (LocalConfiguration.current.screenHeightDp * 0.72f).coerceIn(430f, 600f).dp
     val heroImageHeight = heroHeight * 0.8f
 
+    Box(Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 24.dp),
@@ -184,5 +190,18 @@ fun HomeScreen(
                 }
             }
         }
+    }
+    Box(
+        Modifier
+            .align(Alignment.BottomEnd)
+            .padding(end = 20.dp, bottom = 20.dp)
+            .size(60.dp)
+            .shadow(6.dp, CircleShape)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable(onClick = onOpenAssistant)
+            .semantics { contentDescription = "Assistant de recettes" },
+        contentAlignment = Alignment.Center,
+    ) { Icon(Icons.Filled.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(30.dp)) }
     }
 }

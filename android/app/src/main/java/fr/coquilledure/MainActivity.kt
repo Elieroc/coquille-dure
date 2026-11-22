@@ -104,6 +104,7 @@ private fun CoquilleDureRoot(splashDone: Boolean) {
                 HomeScreen(
                     onRecipeClick = { navController.navigate(Screen.RecipeDetail.withId(it)) },
                     onOpenProfile = { navController.navigate(Screen.Profile.route) },
+                    onOpenAssistant = { navController.navigate(Screen.Assistant.route) { launchSingleTop = true } },
                 )
             }
             composable(Screen.Search.route) {
@@ -197,6 +198,12 @@ private fun CoquilleDureRoot(splashDone: Boolean) {
             }
             composable(Screen.CookidooImport.route) {
                 fr.coquilledure.ui.importer.CookidooImportScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Screen.Assistant.route) {
+                fr.coquilledure.ui.assistant.AssistantScreen(
+                    onBack = { navController.popBackStack() },
+                    onRecipeClick = { navController.navigate(Screen.RecipeDetail.withId(it)) },
+                )
             }
             composable(Screen.CookingMode.route) {
                 CookingModeScreen(onBack = { navController.popBackStack() })

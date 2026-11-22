@@ -37,7 +37,7 @@ data class RecipeFilter(
             where += categoryIds.joinToString(" OR ", "(", ")") { args += "%$it%"; "recipes.categoryIds LIKE ?" }
         }
         if (categoryNames.isNotEmpty()) {
-            where += categoryNames.joinToString(" OR ", "(", ")") { args += "%\"name\":\"$it\"%"; "recipes.categoriesJson LIKE ?" }
+            where += categoryNames.joinToString(" OR ", "(", ")") { args += "%\"name\": \"$it\"%"; "recipes.categoriesJson LIKE ?" }
         }
         maxActiveSeconds?.let { where += "recipes.activeTime <= ?"; args += it }
         maxTotalSeconds?.let { where += "recipes.totalTime <= ?"; args += it }
@@ -53,8 +53,8 @@ data class RecipeFilter(
         if (minRatings.isNotEmpty()) {
             where += minRatings.joinToString(" OR ", "(", ")") { args += it; args += it + 1; "(recipes.rating >= ? AND recipes.rating < ?)" }
         }
-        includeIngredients.forEach { where += "recipes.ingredientsJson LIKE ?"; args += "%\"name\":\"%$it%" }
-        excludeIngredients.forEach { where += "recipes.ingredientsJson NOT LIKE ?"; args += "%\"name\":\"%$it%" }
+        includeIngredients.forEach { where += "recipes.ingredientsJson LIKE ?"; args += "%\"name\": \"%$it%" }
+        excludeIngredients.forEach { where += "recipes.ingredientsJson NOT LIKE ?"; args += "%\"name\": \"%$it%" }
         tmVersion?.let { where += "recipes.tmVersions LIKE ?"; args += "%$it%" }
         val order = when (sort) {
             SortMode.RELEVANCE -> if (terms.isEmpty()) "recipes.ratingCount DESC" else "recipes.ratingCount DESC, recipes.name"
